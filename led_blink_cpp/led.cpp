@@ -1,4 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
 //  Copyright Christopher Kormanyos 2007 - 2021.
 //  Distributed under the Boost Software License,
 //  Version 1.0. (See accompanying file LICENSE_1_0.txt
@@ -8,11 +7,14 @@
 // The LED program.
 
 #include <cstdint>
-#include "mcal_reg.h"
+// #include "mcal_reg.h"
 
-class led
-{
-public:
+#define DDRB  0x24
+#define PORTB 0x25
+#define PINB5 0x20
+
+class led {
+ public:
   // Use convenient class-specific typedefs.
   typedef std::uint8_t port_type;
   typedef std::uint8_t bval_type;
@@ -20,8 +22,7 @@ public:
   // The led class constructor.
   led(const port_type p,
       const bval_type b) : port(p),
-                           bval(b)
-  {
+                           bval(b) {
     // Set the port pin value to low.
     *reinterpret_cast<volatile bval_type*>(port)
       &= static_cast<bval_type>(~bval);
@@ -31,45 +32,42 @@ public:
     // Note that the address of the port direction
     // register is one less than the address
     // of the port value register.
-    const port_type pdir = port - 1U;
+    const port_type pdir = DDRB;
 
     *reinterpret_cast<volatile bval_type*>(pdir)
       |= bval;
   }
 
-  void toggle() const
-  {
+  void toggle() const {
     // Toggle the LED via direct memory access.
     *reinterpret_cast<volatile bval_type*>(port)
       ^= bval;
   }
 
-private:
+ private:
   // Private member variables of the class.
   const port_type port;
   const bval_type bval;
 };
 
-namespace
-{
+namespace {
   // Create led_b5 on portb.5.
-  const led led_b5
-  {
-    mcal::reg::portb,
-    mcal::reg::bval5
+  const led led_b5 {
+// mcal::reg::portb,
+    PORTB,
+//    mcal::reg::bval5
+    PINB5
   };
 }
 
-int main()
-{
+int main() {
   // Toggle led_b5 in a loop forever.
-  for(;;)
-  {
+  for (;;) {
     led_b5.toggle();
 
     // Some boards have a slower LED electrical
     // response on the port. Optionally activate
     // delay loop if LED toggle is not visible.
-    for(volatile std::uint32_t delay = 0; delay < 1000000 ; ++delay) { ; }
+    for (volatile std::uint32_t delay = 0; delay < 500000 ; ++delay) { ; }
   }
 }

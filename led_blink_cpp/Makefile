@@ -5,7 +5,7 @@ DEVICE     = atmega328p
 PROGRAMMER = stk500v1
 BAUD       = 19200
 CLOCK      = F_CPU=8000000
-COMPILE    = avr-g++ -Wall -O2 -std=c++11 -I.  -D $(CLOCK) -mmcu=$(DEVICE)
+COMPILE    = avr-g++ -Wall -O2 -std=c++11 -I.  -D $(CLOCK) -mmcu=$(DEVICE) -I/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/avr
 LDFLAGS = -Wl,-Map,$(BUILDDIR)/$(FILENAME).map 
 LDFLAGS += -Wl,--gc-sections 
 
@@ -15,7 +15,7 @@ default: compile flash clean
 
 compile:
 	mkdir -p $(BUILDDIR)
-	$(COMPILE) -c $(FILENAME).cpp -o $(BUILDDIR)/$(FILENAME).o
+	$(COMPILE) -v -c $(FILENAME).cpp -o $(BUILDDIR)/$(FILENAME).o
 	$(COMPILE) $(LDFLAGS) -o $(BUILDDIR)/$(FILENAME).elf $(BUILDDIR)/$(FILENAME).o
 	avr-objcopy -j .text -j .data -O ihex $(BUILDDIR)/$(FILENAME).elf $(BUILDDIR)/$(FILENAME).hex 
 	avr-size --format=avr --mcu=$(DEVICE) $(BUILDDIR)/$(FILENAME).elf
