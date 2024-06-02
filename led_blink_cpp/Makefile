@@ -5,7 +5,7 @@ DEVICE     = atmega328p
 PROGRAMMER = stk500v1
 BAUD       = 19200
 CLOCK      = F_CPU=8000000
-COMPILE    = avr-g++ -Wall -O2 -std=c++11 -I.  -D $(CLOCK) -mmcu=$(DEVICE) -I/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/avr
+COMPILE    = avr-g++ -Wall -O2 -std=c++11 -I.  -D $(CLOCK) -mmcu=$(DEVICE)
 LDFLAGS = -Wl,-Map,$(BUILDDIR)/$(FILENAME).map 
 LDFLAGS += -Wl,--gc-sections 
 

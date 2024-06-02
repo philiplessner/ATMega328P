@@ -7,11 +7,7 @@
 // The LED program.
 
 #include <cstdint>
-// #include "mcal_reg.h"
-
-#define DDRB  0x24
-#define PORTB 0x25
-#define PINB5 0x20
+#include "mcal_reg.h"
 
 class led {
  public:
@@ -32,7 +28,7 @@ class led {
     // Note that the address of the port direction
     // register is one less than the address
     // of the port value register.
-    const port_type pdir = DDRB;
+    const port_type pdir = mcal::reg::DDRB;
 
     *reinterpret_cast<volatile bval_type*>(pdir)
       |= bval;
@@ -53,10 +49,8 @@ class led {
 namespace {
   // Create led_b5 on portb.5.
   const led led_b5 {
-// mcal::reg::portb,
-    PORTB,
-//    mcal::reg::bval5
-    PINB5
+    mcal::reg::PORTB,
+    mcal::reg::PINB5
   };
 }
 
@@ -68,6 +62,6 @@ int main() {
     // Some boards have a slower LED electrical
     // response on the port. Optionally activate
     // delay loop if LED toggle is not visible.
-    for (volatile std::uint32_t delay = 0; delay < 500000 ; ++delay) { ; }
+    for (volatile std::uint32_t delay = 0; delay < 50000 ; ++delay) { ; }
   }
 }
