@@ -1,6 +1,6 @@
-###Bare Metal Programming for ATMega328P###
+**Bare Metal Programming for ATMega328P**
 
-**Source Code From**
+*Source Code From*
 
 Elliot Williams, "Make: AVR Programming", Maker Media, 2014.
 
