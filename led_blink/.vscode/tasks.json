@@ -1,0 +1,50 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: avr-gcc build active file",
+			"command": "/opt/avr8-gnu-toolchain-linux_x86_64/bin/avr-gcc",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-g",
+				"${file}",
+				"-o",
+				"${fileDirname}/build/${fileBasenameNoExtension}.elf",
+				"-mmcu=atmega328p",
+				"-DF_CPU=8000000UL",
+				"-Os",
+				"-Wall",
+				"-Wl,-Map=${fileDirname}/build/${fileBasenameNoExtension}.map",
+				"-Wl,--cref"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compiler: /opt/avr8-gnu-toolchain-linux_x86_64/bin/avr-gcc"
+		},
+		{
+			"type": "cppbuild",
+			"label": "avr-objcopy to hex",
+			"command": "/opt/avr8-gnu-toolchain-linux_x86_64/bin/avr-objcopy",
+			"args": [
+				"-O",
+				"ihex",
+				"${fileDirname}/build/${fileBasenameNoExtension}.elf",
+				"${fileDirname}/build/${fileBasenameNoExtension}.hex"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "program /opt/avr8-gnu-toolchain-linux_x86_64/bin/avr-objcopy"
+		}
+	]
+}

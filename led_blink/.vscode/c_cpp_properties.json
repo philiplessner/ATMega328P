@@ -1,0 +1,30 @@
+{
+    "configurations": [
+        {
+            "name": "AVR",
+            "includePath": [
+                "/opt/avr8-gnu-toolchain-linux_x86_64/avr/**",
+                "/opt/avr8-gnu-toolchain-linux_x86_64/include/**",
+                "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/**"
+            ],
+            "defines": [],
+            "compilerPath": "/opt/avr8-gnu-toolchain-linux_x86_64/bin/avr-gcc",
+            "cStandard": "${default}",
+            "cppStandard": "${default}",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerArgs": [
+                "-g",
+                "-Os",
+                "-Wall",
+                "-Wextra",
+                "-fpermissive",
+                "-fno-exceptions",
+                "-fno-threadsafe-statics",
+                "-pipe",
+                "-mmcu=atmega328p",
+                "-DF_CPU=8000000UL"
+            ]
+        }
+    ],
+    "version": 4
+}
