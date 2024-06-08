@@ -1,24 +1,100 @@
-FILENAME   = main
-BUILDDIR    = $(CURDIR)/build
-PORT       = /dev/ttyUSB0
-DEVICE     = atmega328p
-PROGRAMMER = stk500v1
-BAUD       = 19200
-CLOCK      = F_CPU=8000000
-COMPILE    = avr-gcc -Wall -Os -D $(CLOCK) -mmcu=$(DEVICE)
 
+##########------------------------------------------------------##########
+##########              Project-specific Details                ##########
+##########    Check these every time you start a new project    ##########
+##########------------------------------------------------------##########
 
-default: compile upload clean
+MCU   = atmega328p
+F_CPU = 8000000UL  
+BAUD  = 19200UL
 
-compile:
-	mkdir -p $(BUILDDIR)
-	$(COMPILE) -c $(FILENAME).c -o $(BUILDDIR)/$(FILENAME).o
-	$(COMPILE) -o $(BUILDDIR)/$(FILENAME).elf $(BUILDDIR)/$(FILENAME).o
-	avr-objcopy -j .text -j .data -O ihex $(BUILDDIR)/$(FILENAME).elf $(BUILDDIR)/$(FILENAME).hex 
-	avr-size --format=avr --mcu=$(DEVICE) $(BUILDDIR)/$(FILENAME).elf
+##########------------------------------------------------------##########
+##########                 Programmer Defaults                  ##########
+##########          Set up once, then forget about it           ##########
+##########        (Can override.  See bottom of file.)          ##########
+##########------------------------------------------------------##########
 
-upload:
-	avrdude -v -p $(DEVICE) -c $(PROGRAMMER) -P $(PORT) -b $(BAUD) -U flash:w:$(BUILDDIR)/$(FILENAME).hex:i
+PROGRAMMER_TYPE = stk500v1
+# extra arguments to avrdude: baud rate, chip type, -F flag, etc.
+PROGRAMMER_ARGS = -P /dev/ttyUSB0 -b 19200
+
+##########------------------------------------------------------##########
+##########                  Program Locations                   ##########
+##########     Won't need to change if they're in your PATH     ##########
+##########------------------------------------------------------##########
+
+CC = avr-gcc
+OBJCOPY = avr-objcopy
+OBJDUMP = avr-objdump
+AVRSIZE = avr-size
+AVRDUDE = avrdude
+
+##########------------------------------------------------------##########
+##########                   Makefile Magic!                    ##########
+##########         Summary:                                     ##########
+##########             We want a .hex file                      ##########
+##########        Compile source files into .elf                ##########
+##########        Convert .elf file into .hex                   ##########
+##########        You shouldn't need to edit below.             ##########
+##########------------------------------------------------------##########
+
+## The name of your project (without the .c)
+# TARGET = blinkLED
+## Or name it automatically after the enclosing directory
+TARGET = $(lastword $(subst /, ,$(CURDIR)))
+
+# Object files: will find all .c/.h files in current directory
+# If you have any other (sub-)directories with code,
+#  you can add them in to SOURCES below in the wildcard statement.
+SOURCES=$(wildcard *.c)
+OBJECTS=$(SOURCES:.c=.o)
+HEADERS=$(SOURCES:.c=.h)
+
+## Compilation options, type man avr-gcc if you're curious.
+CPPFLAGS = -DF_CPU=$(F_CPU) -DBAUD=$(BAUD) -I.
+CFLAGS = -Os -g -std=gnu99 -Wall
+## Use short (8-bit) data types 
+CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums 
+## Splits up object files per function
+CFLAGS += -ffunction-sections -fdata-sections 
+LDFLAGS = -Wl,-Map,$(TARGET).map 
+## Optional, but often ends up with smaller code
+LDFLAGS += -Wl,--gc-sections 
+TARGET_ARCH = -mmcu=$(MCU)
+
+## Explicit pattern rules:
+##  To make .o files from .c files 
+%.o: %.c $(HEADERS) Makefile
+	 $(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@ $<;
+
+$(TARGET).elf: $(OBJECTS)
+	$(CC) $(LDFLAGS) $(TARGET_ARCH) $^ $(LDLIBS) -o $@
+
+%.hex: %.elf
+	 $(OBJCOPY) -j .text -j .data -O ihex $< $@
+
+%.lst: %.elf
+	$(OBJDUMP) -S $< > $@
+
+.PHONY: all disassemble disasm size clean squeaky_clean flash
+
+disassemble: $(TARGET).lst
+
+disasm: disassemble
+
+size:  $(TARGET).elf
+	$(AVRSIZE) -C --mcu=$(MCU) $(TARGET).elf
+
+all: $(TARGET).hex size disasm
+
+flash: $(TARGET).hex 
+	$(AVRDUDE) -v -v -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$<:i
 
 clean:
-	rm -rf $(BUILDDIR)
+	rm -f $(TARGET).elf $(TARGET).hex $(TARGET).obj \
+	$(TARGET).o $(TARGET).d $(TARGET).eep $(TARGET).lst \
+	$(TARGET).lss $(TARGET).sym $(TARGET).map $(TARGET)~ \
+	$(TARGET).eeprom
+
+squeaky_clean:
+	rm -f *.elf *.hex *.obj *.o *.d *.eep *.lst *.lss *.sym *.map *~ *.eeprom
